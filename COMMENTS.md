@@ -1,47 +1,50 @@
 # COMMENTS.md
 
-## 🧱 Architecture Used
+## ✅ Arquitetura e Decisões Técnicas
 
-The project follows a layered architecture for clarity, scalability, and separation of concerns:
+- **Backend em .NET 8 (WebAPI)**
+- Arquitetura em camadas:
+  - `EdTech.API`: camada de apresentação (controllers e startup)
+  - `EdTech.Application`: (reservada para regras de negócio futuras)
+  - `EdTech.Infrastructure`: persistência e contexto de banco
+- Banco de dados PostgreSQL
+- Uso do **Entity Framework Core** para ORM
+- Migrations e versionamento de schema aplicados com sucesso
+- Documentação automática via Swagger
 
-- `EdTech.API` – ASP.NET Core Web API project, responsible for exposing endpoints
-- `EdTech.Application` – Application layer to contain business logic (to be expanded)
-- `EdTech.Infrastructure` – Persistence layer using Entity Framework Core with PostgreSQL
+## 📁 Funcionalidades implementadas
 
-This approach allows clear separation between the web layer, domain logic, and data access.
+- [x] Criação de projeto WebAPI estruturado
+- [x] Configuração do banco com EF Core + PostgreSQL
+- [x] Criação do modelo `Student` com validações básicas
+- [x] Implementação do `AppDbContext`
+- [x] Criação da migration inicial e aplicação no banco
+- [x] Implementação do `StudentsController` com:
+  - [x] `GET /api/students`
+  - [x] `GET /api/students/{id}`
+  - [x] `POST /api/students`
+  - [x] `PUT /api/students/{id}`
+  - [x] `DELETE /api/students/{id}`
+- [x] Testes realizados via Swagger UI
 
----
+## 🧠 Melhorias se houvesse mais tempo
 
-## 📦 Third-Party Libraries
+- Adicionar validações com `FluentValidation` (ex: CPF válido)
+- Implementar testes unitários com xUnit
+- Aplicar padrão `DTO` para entrada/saída de dados
+- Melhorar tratamento de erros (retornos padronizados)
+- Adicionar versionamento de API (`v1`, `v2`, etc.)
+- Implementar log de ações
 
-The following NuGet packages were used to support Entity Framework Core and PostgreSQL integration:
+## 📦 Bibliotecas externas utilizadas
 
 - `Microsoft.EntityFrameworkCore`
 - `Microsoft.EntityFrameworkCore.Design`
 - `Npgsql.EntityFrameworkCore.PostgreSQL`
+- `Swashbuckle.AspNetCore` (Swagger)
 
-These libraries enable code-first migrations and PostgreSQL support through EF Core.
+## ❌ Requisitos ainda não entregues
 
----
-
-## 🧠 What I Would Improve With More Time
-
-- Add unit tests using xUnit and Moq
-- Implement validation for CPF and RA fields
-- Create DTOs and mapping logic to separate domain entities from API models
-- Add Swagger customization and API versioning
-- Build seed data and add pagination for student listing
-- Integrate a service layer with interfaces for better testability and extensibility
-
----
-
-## ❌ Unimplemented Requirements
-
-- Unit tests (not yet implemented)
-- Frontend (to be added in the next stage)
-
----
-
-## ✅ Additional Notes
-
-The `.gitignore` was updated to support both .NET (Visual Studio, EF Core build folders) and potential frontend tools (Node/Vue). The repository structure mirrors best practices for clean separation between backend and frontend layers.
+- Integração com camada Application (uso ainda mínimo)
+- Testes unitários
+- Validações detalhadas no modelo
