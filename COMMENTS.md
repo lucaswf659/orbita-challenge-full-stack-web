@@ -1,50 +1,50 @@
 # COMMENTS.md
 
-## ✅ Arquitetura e Decisões Técnicas
+## ✅ Architecture and Technical Decisions
 
-- **Backend em .NET 8 (WebAPI)**
-- Arquitetura em camadas:
-  - `EdTech.API`: camada de apresentação (controllers e startup)
-  - `EdTech.Application`: (reservada para regras de negócio futuras)
-  - `EdTech.Infrastructure`: persistência e contexto de banco
-- Banco de dados PostgreSQL
-- Uso do **Entity Framework Core** para ORM
-- Migrations e versionamento de schema aplicados com sucesso
-- Documentação automática via Swagger
+- **Backend built with .NET 8 (WebAPI)**
+- Layered architecture:
+  - `EdTech.API`: presentation layer (controllers and startup config)
+  - `EdTech.Application`: reserved for business logic (not yet used)
+  - `EdTech.Infrastructure`: persistence layer and database context
+- PostgreSQL as the database
+- **Entity Framework Core** used as ORM
+- Migrations managed and applied with EF CLI
+- Auto-generated API documentation using Swagger
 
-## 📁 Funcionalidades implementadas
+## 📁 Implemented Features
 
-- [x] Criação de projeto WebAPI estruturado
-- [x] Configuração do banco com EF Core + PostgreSQL
-- [x] Criação do modelo `Student` com validações básicas
-- [x] Implementação do `AppDbContext`
-- [x] Criação da migration inicial e aplicação no banco
-- [x] Implementação do `StudentsController` com:
+- [x] Created structured WebAPI solution
+- [x] Configured PostgreSQL connection via EF Core
+- [x] Created `Student` entity with base validation
+- [x] Implemented `AppDbContext` for database mapping
+- [x] Created and applied initial database migration
+- [x] Implemented `StudentsController` with full CRUD operations:
   - [x] `GET /api/students`
   - [x] `GET /api/students/{id}`
   - [x] `POST /api/students`
   - [x] `PUT /api/students/{id}`
   - [x] `DELETE /api/students/{id}`
-- [x] Testes realizados via Swagger UI
+- [x] All endpoints tested using Swagger UI
 
-## 🧠 Melhorias se houvesse mais tempo
+## 🚀 Potential Improvements (if more time was available)
 
-- Adicionar validações com `FluentValidation` (ex: CPF válido)
-- Implementar testes unitários com xUnit
-- Aplicar padrão `DTO` para entrada/saída de dados
-- Melhorar tratamento de erros (retornos padronizados)
-- Adicionar versionamento de API (`v1`, `v2`, etc.)
-- Implementar log de ações
+- Add validation using FluentValidation (e.g., valid CPF)
+- Implement unit tests with xUnit or NUnit
+- Use DTOs for input/output models
+- Apply standardized error handling (problem details)
+- Enable API versioning (`v1`, `v2`, etc.)
+- Add action/event logging
 
-## 📦 Bibliotecas externas utilizadas
+## 📦 Third-party Packages Used
 
 - `Microsoft.EntityFrameworkCore`
 - `Microsoft.EntityFrameworkCore.Design`
 - `Npgsql.EntityFrameworkCore.PostgreSQL`
-- `Swashbuckle.AspNetCore` (Swagger)
+- `Swashbuckle.AspNetCore` (Swagger/OpenAPI)
 
-## ❌ Requisitos ainda não entregues
+## ❌ Pending Requirements
 
-- Integração com camada Application (uso ainda mínimo)
-- Testes unitários
-- Validações detalhadas no modelo
+- Business logic layer (Application) integration
+- Unit tests
+- Detailed field validation (e.g., unique CPF and RA checks)
