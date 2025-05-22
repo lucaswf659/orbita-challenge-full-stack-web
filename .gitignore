@@ -102,3 +102,30 @@ dist
 
 # TernJS port file
 .tern-port
+
+# .NET / Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build outputs
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+
+# Rider
+.idea/
+
+# EF Core generated files
+*.db
+*.db-shm
+*.db-wal
+Migrations/
+
+# ASP.NET secrets
+secrets.json
+
+# Projeto ASP.NET Core
+wwwroot/

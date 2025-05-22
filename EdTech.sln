@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdTech.API", "EdTech.API\EdTech.API.csproj", "{F6AED22B-AB45-4B39-9675-C784E13C7C99}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdTech.Application", "EdTech.Application\EdTech.Application.csproj", "{BD2005BE-B060-4E85-BDCC-B6BA41A200B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdTech.Infrastructure", "EdTech.Infrastructure\EdTech.Infrastructure.csproj", "{98F80646-F202-4635-8ADB-4E03D2323DA0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F6AED22B-AB45-4B39-9675-C784E13C7C99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6AED22B-AB45-4B39-9675-C784E13C7C99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6AED22B-AB45-4B39-9675-C784E13C7C99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6AED22B-AB45-4B39-9675-C784E13C7C99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD2005BE-B060-4E85-BDCC-B6BA41A200B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD2005BE-B060-4E85-BDCC-B6BA41A200B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD2005BE-B060-4E85-BDCC-B6BA41A200B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD2005BE-B060-4E85-BDCC-B6BA41A200B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98F80646-F202-4635-8ADB-4E03D2323DA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98F80646-F202-4635-8ADB-4E03D2323DA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98F80646-F202-4635-8ADB-4E03D2323DA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98F80646-F202-4635-8ADB-4E03D2323DA0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
