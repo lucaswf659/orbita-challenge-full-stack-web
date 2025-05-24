@@ -7,20 +7,20 @@ import StudentForm from "@/pages/StudentForm.vue";
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
-    redirect: "/alunos",
+    redirect: "/students",
   },
   {
-    path: "/alunos",
+    path: "/students",
     name: "StudentList",
     component: StudentList,
   },
   {
-    path: "/alunos/novo",
+    path: "/students/new",
     name: "StudentCreate",
     component: StudentForm,
   },
   {
-    path: "/alunos/:id/editar",
+    path: "/students/edit/:id",
     name: "StudentEdit",
     component: StudentForm,
     props: true,
