@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1>{{ isEdit ? "Edit Student" : "New Student" }}</h1>
+    <h1>{{ isEdit ? "Editar Aluno(a)" : "Novo Aluno(a)" }}</h1>
 
     <v-form @submit.prevent="save">
       <v-text-field label="Name" v-model="form.Name" required />
@@ -13,8 +13,10 @@
         required
       />
 
-      <v-btn type="submit" color="primary" class="mt-4">Save</v-btn>
-      <v-btn text class="mt-4" @click="router.push('/students')">Cancel</v-btn>
+      <v-btn type="submit" color="primary" class="mt-4">Salvar</v-btn>
+      <v-btn text class="mt-4" @click="router.push('/students')"
+        >Cancelar</v-btn
+      >
     </v-form>
   </v-container>
 </template>
