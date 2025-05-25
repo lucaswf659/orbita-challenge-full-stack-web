@@ -8,8 +8,11 @@
     <!-- Sidebar -->
     <Sidebar />
 
-    <!-- Conteúdo -->
-    <v-main>
+    <!-- Content -->
+    <v-main
+      class="fill-height d-flex flex-column"
+      style="background-color: #f8f9fa; padding-left: 256px"
+    >
       <v-container fluid>
         <router-view v-slot="{ Component }">
           <component :is="Component" />

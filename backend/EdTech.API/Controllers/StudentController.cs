@@ -16,13 +16,50 @@ public class StudentsController : ControllerBase
         _context = context;
     }
 
-    // GET: api/students
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(
+     [FromQuery] int pageNumber = 1,
+     [FromQuery] int pageSize = 10,
+     [FromQuery] string? search = "")
     {
-        var students = await _context.Students.ToListAsync();
-        return Ok(students);
+        if (pageNumber < 1 || pageSize < 1)
+            return BadRequest("Número de página e tamanho devem ser maiores que 0.");
+
+        // Base query
+        var query = _context.Students.AsQueryable();
+
+        // Aplica o filtro, se houver
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.ToLower();
+            query = query.Where(s =>
+                s.Name.ToLower().Contains(search) ||
+                s.RA.ToLower().Contains(search) ||
+                s.Email.ToLower().Contains(search) ||
+                s.CPF.ToLower().Contains(search));
+        }
+
+        var totalItems = await query.CountAsync();
+
+        var students = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var result = new
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalItems = totalItems,
+            TotalPages = (int)Math.Ceiling((double)totalItems / pageSize),
+            Items = students
+        };
+
+        return Ok(result);
     }
+
+
+
 
     // GET: api/students/{id}
     [HttpGet("{id}")]

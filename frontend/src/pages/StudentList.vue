@@ -1,118 +1,150 @@
 <template>
-  <v-container>
-    <v-row class="mb-4">
-      <v-col cols="12" md="6">
+  <v-container
+    fluid
+    class="pa-6"
+    style="max-width: 100vw; background-color: #f8f9fa"
+  >
+    <!-- Search & Actions -->
+    <v-row class="align-center justify-space-between mb-4">
+      <v-col cols="12" md="6" class="d-flex align-center gap-2">
         <v-text-field
           v-model="search"
-          label="Buscar por Nome, RA ou CPF"
-          prepend-icon="mdi-magnify"
+          label="Search by Name, RA or CPF"
           clearable
-          density="comfortable"
+          dense
+          hide-details
+          class="w-100"
         />
+        <v-btn color="primary" @click="onSearch">Search</v-btn>
+        <v-btn @click="onClear" variant="text">Clear</v-btn>
       </v-col>
-      <v-row class="justify-space-between align-center mb-4">
-        <v-btn color="primary" @click="goToCreate">Cadastrar Estudante</v-btn>
-      </v-row>
+      <v-col cols="12" md="6" class="d-flex justify-end">
+        <v-btn color="primary" @click="goToCreate">Add Student</v-btn>
+      </v-col>
     </v-row>
 
-    <v-data-table
-      :headers="headers"
-      :items="filteredStudents"
-      item-value="id"
-      class="elevation-1"
-      :items-per-page="10"
-    >
-      <template v-slot:item.actions="{ item }">
-        <v-btn
-          icon
-          color="blue"
-          @click="editStudent(item)"
-          :title="'Editar ' + item.name"
-        >
-          <v-icon>mdi-pencil</v-icon>
-        </v-btn>
-        <v-btn
-          icon
-          color="red"
-          @click="confirmDelete(item)"
-          :title="'Excluir ' + item.name"
-        >
-          <v-icon>mdi-delete</v-icon>
-        </v-btn>
-      </template>
-    </v-data-table>
+    <!-- Table -->
+    <v-row no-gutters>
+      <v-col cols="12">
+        <div style="min-height: 600px">
+          <v-data-table
+            :headers="headers"
+            :items="students"
+            :page="pageNumber"
+            :items-per-page="pageSize"
+            :server-items-length="totalStudents"
+            :items-per-page-options="[5, 10, 20]"
+            :loading="loading"
+            item-value="id"
+            class="elevation-1 w-100"
+            style="min-width: 1000px"
+            fixed-header
+            height="500px"
+            @update:page="pageNumber = $event"
+            @update:items-per-page="pageSize = $event"
+          >
+            <template v-slot:item.actions="{ item }">
+              <div class="d-flex gap-1 justify-end">
+                <v-btn size="small" variant="text" @click="editStudent(item)">
+                  <v-icon size="20" color="primary">mdi-pencil</v-icon>
+                </v-btn>
+                <v-btn size="small" variant="text" @click="confirmDelete(item)">
+                  <v-icon size="20" color="error">mdi-delete</v-icon>
+                </v-btn>
+              </div>
+            </template>
+          </v-data-table>
+        </div>
+      </v-col>
+    </v-row>
 
-    <v-dialog v-model="deleteDialog" max-width="500">
+    <!-- Delete Dialog -->
+    <v-dialog v-model="deleteDialog" max-width="500px">
       <v-card>
-        <v-card-title class="text-h6 font-weight-bold"
-          >Confirmar Exclusão</v-card-title
-        >
+        <v-card-title class="headline">Confirm Delete</v-card-title>
         <v-card-text>
-          Você tem certeza que quer excluir o(a) aluno(a)
-          <strong>{{ selectedStudent?.name }}</strong
+          Are you sure you want to delete
+          <strong class="text-danger">{{ selectedStudent?.name }}</strong
           >?
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="deleteDialog = false">Cancelar</v-btn>
-          <v-btn color="red" @click="deleteStudent">Confirmar</v-btn>
+          <v-btn text @click="deleteDialog = false">Cancel</v-btn>
+          <v-btn color="red" @click="deleteStudent">Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    ```
   </v-container>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from "vue";
+<script setup lang="ts">
+import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { fetchStudents, removeStudent } from "@/services/studentService";
 
 const router = useRouter();
-const students = ref([]);
+
+const students = ref<any[]>([]);
+const totalStudents = ref(0);
+const loading = ref(false);
 const search = ref("");
+const pageNumber = ref(1);
+const pageSize = ref(10);
+
 const deleteDialog = ref(false);
-const selectedStudent = ref(null);
+const selectedStudent = ref<any | null>(null);
 
 const headers = [
-  { text: "Registro Acadêmico", value: "ra" },
-  { text: "Nome", value: "name" },
+  { text: "RA", value: "ra" },
+  { text: "Name", value: "name" },
   { text: "E-mail", value: "email" },
   { text: "CPF", value: "cpf" },
-  { text: "Ações", value: "actions", sortable: false },
+  { text: "Actions", value: "actions", sortable: false },
 ];
 
 const loadStudents = async () => {
+  loading.value = true;
   try {
-    const result = await fetchStudents();
-    console.log("Alunos carregados:", result);
-    students.value = result;
+    const result = await fetchStudents(
+      pageNumber.value,
+      pageSize.value,
+      search.value.trim()
+    );
+    students.value = result.items;
+    totalStudents.value = result.totalItems;
   } catch (err) {
-    console.error("Erro ao carregar alunos:", err);
+    console.error("Error loading students:", err);
+  } finally {
+    loading.value = false;
   }
 };
 
-const filteredStudents = computed(() => {
-  const term = search.value.toLowerCase();
-  return students.value.filter(
-    (s) =>
-      s.name.toLowerCase().includes(term) ||
-      s.ra.toLowerCase().includes(term) ||
-      s.cpf.toLowerCase().includes(term)
-  );
-});
-
 const goToCreate = () => router.push("/students/new");
-const editStudent = (student) => router.push(`/students/edit/${student.id}`);
-const confirmDelete = (student) => {
+const editStudent = (student: any) =>
+  router.push(`/students/edit/${student.id}`);
+
+const confirmDelete = (student: any) => {
   selectedStudent.value = student;
   deleteDialog.value = true;
 };
+
 const deleteStudent = async () => {
+  if (!selectedStudent.value) return;
   await removeStudent(selectedStudent.value.id);
   deleteDialog.value = false;
+  await loadStudents();
+};
+
+const onSearch = () => {
+  pageNumber.value = 1;
   loadStudents();
 };
 
-onMounted(loadStudents);
+const onClear = () => {
+  search.value = "";
+  pageNumber.value = 1;
+  loadStudents();
+};
+
+watch([pageNumber, pageSize], loadStudents, { immediate: true });
 </script>

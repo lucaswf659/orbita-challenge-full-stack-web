@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1>{{ isEdit ? "Editar Aluno(a)" : "Novo Aluno(a)" }}</h1>
+    <h1>{{ isEdit ? "Editar Estudante" : "Novo Estudante" }}</h1>
 
     <v-form @submit.prevent="save">
       <v-text-field label="Name" v-model="form.Name" required />
