@@ -18,14 +18,15 @@
             dense
             hide-details
             class="flex-grow-1"
+            @keyup.enter="onSearch"
           />
-          <v-btn color="primary" @click="onSearch">Search</v-btn>
-          <v-btn variant="text" @click="onClear">Clear</v-btn>
+          <v-btn color="primary" @click="onSearch">Pesquisar</v-btn>
+          <v-btn variant="text" @click="onClear">Limpar</v-btn>
         </div>
       </v-col>
 
       <v-col cols="12" md="5" class="d-flex justify-end mt-2 mt-md-0">
-        <v-btn color="primary" @click="goToCreate">Add Student</v-btn>
+        <v-btn color="primary" @click="goToCreate">Adicionar Estudante</v-btn>
       </v-col>
     </v-row>
 
@@ -65,7 +66,7 @@
       <v-card>
         <v-card-title class="headline">Confirm Deletion</v-card-title>
         <v-card-text>
-          Are you sure you want to delete student
+          Tem certeza que deseja excluir o estudante?
           <strong class="text-danger">{{ selectedStudent?.name }}</strong
           >?
         </v-card-text>
@@ -90,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { fetchStudents, removeStudent } from "@/services/studentService";
 import { onMounted } from "vue";
@@ -103,7 +104,6 @@ const totalStudents = ref(0);
 const loading = ref(false);
 const search = ref("");
 const pageNumber = ref(1);
-const pageSize = ref(10);
 const deleteDialog = ref(false);
 const selectedStudent = ref<any | null>(null);
 
@@ -191,8 +191,4 @@ const onClear = async () => {
   pageNumber.value = 1;
   await fetchData(options.value);
 };
-
-watch([pageNumber, pageSize, search], async () => {
-  await fetchData(options.value);
-});
 </script>
