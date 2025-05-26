@@ -2,46 +2,48 @@
   <v-container
     fluid
     class="pa-6"
-    style="max-width: 100vw; background-color: #f8f9fa"
+    style="background-color: #f8f9fa; max-width: 100vw"
   >
-    <!-- Search & Actions -->
-    <v-row class="align-center justify-space-between mb-4">
-      <v-col cols="12" md="6" class="d-flex align-center gap-2">
-        <v-text-field
-          v-model="search"
-          label="Search by Name, RA or CPF"
-          clearable
-          dense
-          hide-details
-          class="w-100"
-        />
-        <v-btn color="primary" @click="onSearch">Search</v-btn>
-        <v-btn @click="onClear" variant="text">Clear</v-btn>
+    <!-- Top: Search + Create -->
+    <v-row
+      class="w-100 flex-wrap align-center justify-space-between mb-4"
+      no-gutters
+    >
+      <v-col cols="12" md="7">
+        <div class="d-flex flex-wrap align-center" style="gap: 12px">
+          <v-text-field
+            v-model="search"
+            label="Search by Name, RA or CPF"
+            clearable
+            dense
+            hide-details
+            class="flex-grow-1"
+          />
+          <v-btn color="primary" @click="onSearch">Search</v-btn>
+          <v-btn variant="text" @click="onClear">Clear</v-btn>
+        </div>
       </v-col>
-      <v-col cols="12" md="6" class="d-flex justify-end">
+
+      <v-col cols="12" md="5" class="d-flex justify-end mt-2 mt-md-0">
         <v-btn color="primary" @click="goToCreate">Add Student</v-btn>
       </v-col>
     </v-row>
 
     <!-- Table -->
-    <v-row no-gutters>
+    <v-row class="w-100" no-gutters>
       <v-col cols="12">
         <div style="min-height: 600px">
-          <v-data-table
+          <v-data-table-server
             :headers="headers"
-            :items="students"
-            :page="pageNumber"
-            :items-per-page="pageSize"
-            :server-items-length="totalStudents"
-            :items-per-page-options="[5, 10, 20]"
+            v-model:items="students"
+            :items-length="totalStudents"
             :loading="loading"
             item-value="id"
             class="elevation-1 w-100"
             style="min-width: 1000px"
             fixed-header
             height="500px"
-            @update:page="pageNumber = $event"
-            @update:items-per-page="pageSize = $event"
+            @update:options="fetchData"
           >
             <template v-slot:item.actions="{ item }">
               <div class="d-flex gap-1 justify-end">
@@ -53,17 +55,17 @@
                 </v-btn>
               </div>
             </template>
-          </v-data-table>
+          </v-data-table-server>
         </div>
       </v-col>
     </v-row>
 
-    <!-- Delete Dialog -->
+    <!-- Delete confirmation -->
     <v-dialog v-model="deleteDialog" max-width="500px">
       <v-card>
-        <v-card-title class="headline">Confirm Delete</v-card-title>
+        <v-card-title class="headline">Confirm Deletion</v-card-title>
         <v-card-text>
-          Are you sure you want to delete
+          Are you sure you want to delete student
           <strong class="text-danger">{{ selectedStudent?.name }}</strong
           >?
         </v-card-text>
@@ -74,6 +76,16 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Toast feedback -->
+    <v-snackbar
+      v-model="toast.show"
+      :color="toast.color"
+      timeout="4000"
+      location="bottom right"
+    >
+      {{ toast.message }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -81,19 +93,36 @@
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { fetchStudents, removeStudent } from "@/services/studentService";
+import { onMounted } from "vue";
 
 const router = useRouter();
 
+// State
 const students = ref<any[]>([]);
 const totalStudents = ref(0);
 const loading = ref(false);
 const search = ref("");
 const pageNumber = ref(1);
 const pageSize = ref(10);
-
 const deleteDialog = ref(false);
 const selectedStudent = ref<any | null>(null);
 
+const options = ref({
+  page: 1,
+  itemPerPage: 10,
+});
+
+onMounted(() => {
+  fetchData(options.value);
+});
+
+// Toast
+const toast = ref({ show: false, message: "", color: "success" });
+const showToast = (message: string, color: "success" | "error" = "success") => {
+  toast.value = { show: true, message, color };
+};
+
+// Headers
 const headers = [
   { text: "RA", value: "ra" },
   { text: "Name", value: "name" },
@@ -102,23 +131,32 @@ const headers = [
   { text: "Actions", value: "actions", sortable: false },
 ];
 
-const loadStudents = async () => {
+interface DataTableOptions {
+  page: number;
+  itemPerPage: number;
+}
+
+async function fetchData(newOptions: DataTableOptions) {
   loading.value = true;
+
   try {
-    const result = await fetchStudents(
-      pageNumber.value,
-      pageSize.value,
-      search.value.trim()
-    );
+    const page = newOptions.page;
+    const itemsPerPager = newOptions.itemPerPage;
+    const searchTerm = search.value.trim();
+
+    const result = await fetchStudents(page, itemsPerPager, searchTerm);
+
     students.value = result.items;
     totalStudents.value = result.totalItems;
   } catch (err) {
-    console.error("Error loading students:", err);
+    console.error("Error fetching data:", err);
+    showToast("Erro ao buscar alunos");
   } finally {
     loading.value = false;
   }
-};
+}
 
+// Actions
 const goToCreate = () => router.push("/students/new");
 const editStudent = (student: any) =>
   router.push(`/students/edit/${student.id}`);
@@ -130,21 +168,31 @@ const confirmDelete = (student: any) => {
 
 const deleteStudent = async () => {
   if (!selectedStudent.value) return;
-  await removeStudent(selectedStudent.value.id);
-  deleteDialog.value = false;
-  await loadStudents();
+  try {
+    await removeStudent(selectedStudent.value.id);
+    showToast("Student deleted successfully.", "success");
+    await fetchData(options.value);
+  } catch (err) {
+    console.error("Delete failed:", err);
+    showToast("Failed to delete student.", "error");
+  } finally {
+    deleteDialog.value = false;
+  }
 };
 
-const onSearch = () => {
+// Search
+const onSearch = async () => {
   pageNumber.value = 1;
-  loadStudents();
+  await fetchData(options.value);
 };
 
-const onClear = () => {
+const onClear = async () => {
   search.value = "";
   pageNumber.value = 1;
-  loadStudents();
+  await fetchData(options.value);
 };
 
-watch([pageNumber, pageSize], loadStudents, { immediate: true });
+watch([pageNumber, pageSize, search], async () => {
+  await fetchData(options.value);
+});
 </script>
