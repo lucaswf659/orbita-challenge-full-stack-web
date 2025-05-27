@@ -95,7 +95,6 @@ onMounted(() => {
         Id: studentStore.Id,
         Name: studentStore.Name,
         Email: studentStore.Email,
-        RA: studentStore.RA || "",
         CPF: studentStore.CPF || "",
       };
     }
