@@ -126,7 +126,7 @@ const showToast = (message: string, color: "success" | "error" = "success") => {
 // Headers
 const headers = [
   { title: "RA", key: "ra" },
-  { title: "Name", key: "name" },
+  { title: "Nome", key: "name" },
   { title: "CPF", key: "cpf" },
   { title: "E-mail", key: "email" },
   { title: "Actions", key: "actions", sortable: false },
