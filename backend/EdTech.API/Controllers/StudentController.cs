@@ -23,7 +23,7 @@ public class StudentsController : ControllerBase
      [FromQuery] string? search = "")
     {
         if (pageNumber < 1 || pageSize < 1)
-            return BadRequest("N˙mero de p·gina e tamanho devem ser maiores que 0.");
+            return BadRequest("NÔøΩmero de pÔøΩgina e tamanho devem ser maiores que 0.");
 
         // Base query
         var query = _context.Students.AsQueryable();
@@ -70,6 +70,13 @@ public class StudentsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(Student student)
     {
+        
+        var cpfExists = await _context.Students.AnyAsync(s => s.CPF == student.CPF);
+        if (cpfExists)
+        {
+            return Conflict("Um aluno com esse CPF j√° existe.");
+        }
+
         for (int i = 0; i < 5; i++)
         {
             student.RA = await GenerateRAAsync();
@@ -84,14 +91,15 @@ public class StudentsController : ControllerBase
             catch (DbUpdateException ex)
             {
                 if (ex.InnerException?.Message.Contains("IX_Students_RA") == true)
-                    continue;
+                    continue; 
                 else
-                    return StatusCode(500, "Erro ao salvar estudante");
+                    return StatusCode(500, "Erro ao salvar estudante.");
             }
         }
 
-        return Conflict("N„o foi possÌvel gerar RA ˙nico apÛs v·rias tentativas.");
+        return Conflict("N√£o foi poss√≠vel gerar um RA √∫nico ap√≥s v√°rias tentativas.");
     }
+
 
     // PUT: api/students/{id}
     [HttpPut("{id}")]
