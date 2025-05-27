@@ -26,7 +26,7 @@
       </v-col>
 
       <v-col cols="12" md="5" class="d-flex justify-end mt-2 mt-md-0">
-        <v-btn color="primary" @click="goToCreate">Adicionar Estudante</v-btn>
+        <v-btn color="primary" @click="goToCreate">Cadastrar Estudante</v-btn>
       </v-col>
     </v-row>
 
@@ -125,11 +125,11 @@ const showToast = (message: string, color: "success" | "error" = "success") => {
 
 // Headers
 const headers = [
-  { text: "RA", value: "ra" },
-  { text: "Name", value: "name" },
-  { text: "E-mail", value: "email" },
-  { text: "CPF", value: "cpf" },
-  { text: "Actions", value: "actions", sortable: false },
+  { title: "RA", key: "ra" },
+  { title: "Name", key: "name" },
+  { title: "CPF", key: "cpf" },
+  { title: "E-mail", key: "email" },
+  { title: "Actions", key: "actions", sortable: false },
 ];
 
 interface DataTableOptions {
@@ -142,10 +142,10 @@ async function fetchData(newOptions: DataTableOptions) {
 
   try {
     const page = newOptions.page;
-    const itemsPerPager = newOptions.itemPerPage;
+    const itemsPerPage = newOptions.itemPerPage;
     const searchTerm = search.value.trim();
 
-    const result = await fetchStudents(page, itemsPerPager, searchTerm);
+    const result = await fetchStudents(page, itemsPerPage, searchTerm);
 
     students.value = result.items;
     totalStudents.value = result.totalItems;
