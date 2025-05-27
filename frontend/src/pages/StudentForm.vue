@@ -2,26 +2,39 @@
   <v-container>
     <h1>{{ !studentStore.Id ? "Novo Estudante" : "Editar Estudante" }}</h1>
 
-    <v-form @submit.prevent="save">
-      <v-text-field label="Name" v-model="form.Name" required />
-      <v-text-field label="Email" v-model="form.Email" required />
+    <v-form ref="formRef" @submit.prevent="save">
+      <v-text-field
+        label="Nome"
+        v-model="form.Name"
+        :rules="[required]"
+        required
+      />
+      <v-text-field
+        label="E-mail"
+        v-model="form.Email"
+        :rules="[required, validateEmail]"
+        required
+      />
       <v-text-field
         label="RA"
         v-model="form.RA"
         :disabled="!!studentStore.Id"
+        :rules="[required]"
         required
       />
       <v-text-field
         label="CPF"
         v-model="form.CPF"
+        :rules="[required, validateCpf]"
+        v-mask="'###.###.###-##'"
         :disabled="!!studentStore.Id"
         required
       />
 
       <v-btn type="submit" color="primary" class="mt-4">Salvar</v-btn>
-      <v-btn text class="mt-4" @click="router.push('/students')"
-        >Cancelar</v-btn
-      >
+      <v-btn text class="mt-4" @click="router.push('/students')">
+        Cancelar
+      </v-btn>
     </v-form>
 
     <!-- Toast feedback -->
@@ -46,14 +59,11 @@ const router = useRouter();
 const route = useRoute();
 const studentStore = useStudentsStore();
 
+// Refs
+const formRef = ref();
+
 // Form data
-const form = ref<{
-  Id: number | null;
-  Name: string;
-  Email: string;
-  RA: string;
-  CPF: string;
-}>({
+const form = ref({
   Id: null,
   Name: "",
   Email: "",
@@ -65,6 +75,20 @@ const form = ref<{
 const toast = ref({ show: false, message: "", color: "success" });
 const showToast = (message: string, color: "success" | "error" = "success") => {
   toast.value = { show: true, message, color };
+};
+
+// Validações
+const required = (value: string) =>
+  (!!value && value.trim() !== "") || "Campo obrigatório";
+
+const validateEmail = (value: string) => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(value) || "E-mail inválido";
+};
+
+const validateCpf = (value: string) => {
+  const regex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+  return regex.test(value) || "CPF inválido";
 };
 
 onMounted(() => {
@@ -83,18 +107,13 @@ onMounted(() => {
         CPF: studentStore.CPF || "",
       };
     }
-  } else {
-    form.value = {
-      Id: null,
-      Name: "",
-      Email: "",
-      RA: "",
-      CPF: "",
-    };
   }
 });
 
 const save = async () => {
+  const { valid } = await formRef.value.validate();
+  if (!valid) return;
+
   try {
     const payload = { ...form.value } as any;
     if (!studentStore.Id) delete payload.Id;
