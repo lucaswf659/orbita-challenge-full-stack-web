@@ -16,13 +16,6 @@
         required
       />
       <v-text-field
-        label="RA"
-        v-model="form.RA"
-        :disabled="!!studentStore.Id"
-        :rules="[required]"
-        required
-      />
-      <v-text-field
         label="CPF"
         v-model="form.CPF"
         :rules="[required, validateCpf]"
@@ -67,7 +60,6 @@ const form = ref({
   Id: null,
   Name: "",
   Email: "",
-  RA: "",
   CPF: "",
 });
 

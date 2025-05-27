@@ -58,9 +58,6 @@ public class StudentsController : ControllerBase
         return Ok(result);
     }
 
-
-
-
     // GET: api/students/{id}
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
@@ -73,9 +70,27 @@ public class StudentsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(Student student)
     {
-        _context.Students.Add(student);
-        await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetById), new { id = student.Id }, student);
+        for (int i = 0; i < 5; i++)
+        {
+            student.RA = await GenerateRAAsync();
+
+            try
+            {
+                _context.Students.Add(student);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetById), new { id = student.Id }, student);
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException?.Message.Contains("IX_Students_RA") == true)
+                    continue;
+                else
+                    return StatusCode(500, "Erro ao salvar estudante");
+            }
+        }
+
+        return Conflict("Não foi possível gerar RA único após várias tentativas.");
     }
 
     // PUT: api/students/{id}
@@ -87,6 +102,7 @@ public class StudentsController : ControllerBase
 
         student.Name = updatedStudent.Name;
         student.Email = updatedStudent.Email;
+        student.CPF = updatedStudent.CPF;
 
         await _context.SaveChangesAsync();
         return NoContent();
@@ -102,5 +118,31 @@ public class StudentsController : ControllerBase
         _context.Students.Remove(student);
         await _context.SaveChangesAsync();
         return NoContent();
+    }
+
+    private async Task<string> GenerateRAAsync()
+    {
+        var year = DateTime.UtcNow.Year.ToString(); // "2025"
+        var prefix = $"RA{year}";
+
+        var lastRa = await _context.Students
+            .Where(s => s.RA.StartsWith(prefix))
+            .OrderByDescending(s => s.RA)
+            .Select(s => s.RA)
+            .FirstOrDefaultAsync();
+
+        int nextSequence = 1;
+
+        if (!string.IsNullOrEmpty(lastRa) && lastRa.Length >= (prefix.Length + 4))
+        {
+            var sequenceStr = lastRa.Substring(prefix.Length, 4); 
+            if (int.TryParse(sequenceStr, out int parsedSeq))
+            {
+                nextSequence = parsedSeq + 1;
+            }
+        }
+
+        string newRa = $"{prefix}{nextSequence.ToString("D4")}"; // Ex: RA20250001
+        return newRa;
     }
 }
