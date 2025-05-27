@@ -20,7 +20,7 @@ const routes: RouteRecordRaw[] = [
     component: StudentForm,
   },
   {
-    path: "/students/edit/:id",
+    path: "/students/edit",
     name: "StudentEdit",
     component: StudentForm,
     props: true,

@@ -13,7 +13,7 @@
         <div class="d-flex flex-wrap align-center" style="gap: 12px">
           <v-text-field
             v-model="search"
-            label="Search by Name, RA or CPF"
+            label="Pesquisar por nome, RA ou CPF"
             clearable
             dense
             hide-details
@@ -66,7 +66,7 @@
       <v-card>
         <v-card-title class="headline">Confirm Deletion</v-card-title>
         <v-card-text>
-          Tem certeza que deseja excluir o estudante?
+          Tem certeza que deseja excluir o estudante
           <strong class="text-danger">{{ selectedStudent?.name }}</strong
           >?
         </v-card-text>
@@ -95,6 +95,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { fetchStudents, removeStudent } from "@/services/studentService";
 import { onMounted } from "vue";
+import { useStudentsStore } from "@/stores/students";
 
 const router = useRouter();
 
@@ -157,9 +158,25 @@ async function fetchData(newOptions: DataTableOptions) {
 }
 
 // Actions
-const goToCreate = () => router.push("/students/new");
-const editStudent = (student: any) =>
-  router.push(`/students/edit/${student.id}`);
+const goToCreate = () => {
+  const store = useStudentsStore();
+  store.Id = null;
+  store.Name = "";
+  store.Email = "";
+  store.RA = "";
+  store.CPF = "";
+  router.push("/students/new");
+};
+
+const editStudent = (student: any) => {
+  const studentStore = useStudentsStore();
+  studentStore.Name = student.name;
+  studentStore.Email = student.email;
+  studentStore.RA = student.ra;
+  studentStore.CPF = student.cpf;
+  studentStore.Id = student.id;
+  router.push(`/students/edit`);
+};
 
 const confirmDelete = (student: any) => {
   selectedStudent.value = student;

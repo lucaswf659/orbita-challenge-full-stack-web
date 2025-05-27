@@ -1,15 +1,20 @@
 <template>
   <v-container>
-    <h1>{{ isEdit ? "Editar Estudante" : "Novo Estudante" }}</h1>
+    <h1>{{ !studentStore.Id ? "Novo Estudante" : "Editar Estudante" }}</h1>
 
     <v-form @submit.prevent="save">
       <v-text-field label="Name" v-model="form.Name" required />
       <v-text-field label="Email" v-model="form.Email" required />
-      <v-text-field label="RA" v-model="form.RA" :disabled="isEdit" required />
+      <v-text-field
+        label="RA"
+        v-model="form.RA"
+        :disabled="!!studentStore.Id"
+        required
+      />
       <v-text-field
         label="CPF"
         v-model="form.CPF"
-        :disabled="isEdit"
+        :disabled="!!studentStore.Id"
         required
       />
 
@@ -33,15 +38,22 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { fetchStudentById, saveStudent } from "@/services/studentService";
+import { useRouter, useRoute } from "vue-router";
+import { saveStudent } from "@/services/studentService";
+import { useStudentsStore } from "@/stores/students";
 
-const route = useRoute();
 const router = useRouter();
-const isEdit = route.params.id !== undefined;
+const route = useRoute();
+const studentStore = useStudentsStore();
 
 // Form data
-const form = ref({
+const form = ref<{
+  Id: number | null;
+  Name: string;
+  Email: string;
+  RA: string;
+  CPF: string;
+}>({
   Id: null,
   Name: "",
   Email: "",
@@ -55,29 +67,42 @@ const showToast = (message: string, color: "success" | "error" = "success") => {
   toast.value = { show: true, message, color };
 };
 
-// Load data if editing
-onMounted(async () => {
-  if (isEdit && typeof route.params.id === "string") {
-    try {
-      const student = await fetchStudentById(route.params.id);
-      form.value = student;
-    } catch (err) {
-      console.error("Error loading student:", err);
-      showToast("Erro ao carregar estudante.", "error");
+onMounted(() => {
+  const isEditRoute = route.name === "StudentEdit";
+
+  if (isEditRoute) {
+    if (!studentStore.Id) {
+      showToast("Estudante não encontrado. Redirecionando...", "error");
+      router.push("/students");
+    } else {
+      form.value = {
+        Id: studentStore.Id,
+        Name: studentStore.Name,
+        Email: studentStore.Email,
+        RA: studentStore.RA || "",
+        CPF: studentStore.CPF || "",
+      };
     }
+  } else {
+    form.value = {
+      Id: null,
+      Name: "",
+      Email: "",
+      RA: "",
+      CPF: "",
+    };
   }
 });
 
-// Save action
 const save = async () => {
   try {
     const payload = { ...form.value } as any;
-    if (!isEdit) delete payload.Id;
-
+    if (!studentStore.Id) delete payload.Id;
+    console.log("Payload:", payload);
     await saveStudent(payload);
 
     showToast(
-      isEdit
+      studentStore.Id
         ? "Estudante atualizado com sucesso."
         : "Estudante cadastrado com sucesso.",
       "success"
@@ -85,7 +110,6 @@ const save = async () => {
 
     setTimeout(() => router.push("/students"), 500);
   } catch (err) {
-    console.error("Erro ao salvar:", err);
     showToast("Erro ao salvar estudante.", "error");
   }
 };

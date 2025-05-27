@@ -26,8 +26,9 @@ export const fetchStudentById = async (id: string) => {
 };
 
 export const saveStudent = async (student: any) => {
-  if (student.id) {
-    return axios.put(`${API_URL}/${student.id}`, student);
+  console.log("Saving student:", student.Id);
+  if (student.Id) {
+    return axios.put(`${API_URL}/${student.Id}`, student);
   }
   return axios.post(API_URL, student);
 };
