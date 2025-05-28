@@ -49,6 +49,29 @@ public class StudentControllerTests
     }
 
     [Fact]
+    public async Task Create_ShouldIgnoreSuppliedRA_AndGenerateNewOne()
+    {
+        var context = GetDbContext();
+        var controller = new StudentsController(context);
+
+        var student = new Student
+        {
+            Name = "Hackeando",
+            Email = "invasor@fake.com",
+            CPF = "12345678988",
+            RA = "RAH4CK3D"
+        };
+
+        var result = await controller.Create(student);
+
+        result.Should().BeOfType<CreatedAtActionResult>();
+        var created = context.Students.First();
+        created.RA.Should().NotBe("RAH4CK3D");
+        created.RA.Should().StartWith("RA");
+    }
+
+
+    [Fact]
     public async Task Update_ShouldChangeEditableFields_AndKeepRA()
     {
         var context = GetDbContext();
@@ -81,6 +104,49 @@ public class StudentControllerTests
         stored.Email.Should().Be("nova@exemplo.com");
         stored.RA.Should().Be("RA20250001");
     }
+
+    [Fact]
+    public async Task Update_ShouldReturnNotFound_WhenStudentDoesNotExist()
+    {
+        var context = GetDbContext();
+        var controller = new StudentsController(context);
+
+        var result = await controller.Update(999, new Student());
+
+        result.Should().BeOfType<NotFoundResult>();
+    }
+
+    [Fact]
+    public async Task Update_ShouldNotAllowCpfChange()
+    {
+        var context = GetDbContext();
+        var controller = new StudentsController(context);
+
+        var original = new Student
+        {
+            Name = "Marcelo",
+            Email = "m@dev.com",
+            CPF = "99999999999",
+            RA = "RA20259999"
+        };
+        context.Students.Add(original);
+        await context.SaveChangesAsync();
+
+        var update = new Student
+        {
+            Name = "Marcelo Atualizado",
+            Email = "novo@dev.com",
+            CPF = "11111111111", // Tentando mudar!
+            RA = "RA99999999"
+        };
+
+        var result = await controller.Update(original.Id, update);
+        var stored = await context.Students.FindAsync(original.Id);
+
+        stored!.CPF.Should().Be("99999999999");
+    }
+
+
 
     [Fact]
     public async Task Delete_ShouldRemoveStudent()
@@ -139,6 +205,28 @@ public class StudentControllerTests
     }
 
     [Fact]
+    public async Task GetAll_ShouldReturnAll_WhenSearchIsEmpty()
+    {
+        var context = GetDbContext();
+        var controller = new StudentsController(context);
+
+        context.Students.AddRange(new List<Student>
+    {
+        new() { Name = "Lucas", Email = "a@a.com", CPF = "111", RA = "RA20250001" },
+        new() { Name = "Yas", Email = "b@b.com", CPF = "222", RA = "RA20250002" }
+    });
+        await context.SaveChangesAsync();
+
+        var result = await controller.GetAll(1, 10, "");
+
+        var ok = result as OkObjectResult;
+        var json = JsonSerializer.Serialize(ok!.Value);
+        var root = JsonDocument.Parse(json).RootElement;
+        root.GetProperty("TotalItems").GetInt32().Should().Be(2);
+    }
+
+
+    [Fact]
     public async Task Delete_ShouldOnlyRemoveSelectedStudent()
     {
         var context = GetDbContext();
@@ -156,6 +244,18 @@ public class StudentControllerTests
         context.Students.Count().Should().Be(1);
         context.Students.First().Name.Should().Be("B");
     }
+
+    [Fact]
+    public async Task Delete_ShouldReturnNotFound_WhenStudentDoesNotExist()
+    {
+        var context = GetDbContext();
+        var controller = new StudentsController(context);
+
+        var result = await controller.Delete(999);
+
+        result.Should().BeOfType<NotFoundResult>();
+    }
+
 
     [Fact]
     public async Task Create_ShouldReturnConflict_IfCpfAlreadyExists()

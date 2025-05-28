@@ -137,7 +137,7 @@ const headers = [
   { title: "Nome", key: "name" },
   { title: "CPF", key: "cpf" },
   { title: "E-mail", key: "email" },
-  { title: "Actions", key: "actions", sortable: false },
+  { title: "Ações", key: "actions", sortable: false },
 ];
 
 interface DataTableOptions {

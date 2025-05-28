@@ -17,5 +17,18 @@ obj/
 Migrations/
 secrets.json
 
+# Cobertura de testes
+backend/**/TestResults/
+backend/**/CoverageReport/
+
+# HTMLs gerados pelo ReportGenerator
+backend/**/*.html
+backend/**/*.svg
+backend/**/*.css
+
+# Arquivos de build
+backend/**/bin/
+backend/**/obj/
+
 # Geral
 .DS_Store

@@ -103,18 +103,22 @@ public class StudentsController : ControllerBase
 
     // PUT: api/students/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Student updatedStudent)
+    public async Task<IActionResult> Update(int id, [FromBody] Student student)
     {
-        var student = await _context.Students.FindAsync(id);
-        if (student is null) return NotFound();
+        var existing = await _context.Students.FindAsync(id);
+        if (existing == null)
+            return NotFound();
 
-        student.Name = updatedStudent.Name;
-        student.Email = updatedStudent.Email;
-        student.CPF = updatedStudent.CPF;
+        student.Id = id;
+        student.RA = existing.RA;     // mantém o RA original
+        student.CPF = existing.CPF;   // mantém o CPF original
 
+        _context.Entry(existing).CurrentValues.SetValues(student);
         await _context.SaveChangesAsync();
+
         return NoContent();
     }
+
 
     // DELETE: api/students/{id}
     [HttpDelete("{id}")]
