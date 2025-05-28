@@ -1,160 +1,132 @@
+using EdTech.API.DTO.Students;
 using EdTech.Infrastructure;
 using EdTech.Infrastructure.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace EdTech.API.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class StudentsController : ControllerBase
+namespace EdTech.API.Controllers
 {
-    private readonly AppDbContext _context;
-
-    public StudentsController(AppDbContext context)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class StudentsController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly AppDbContext _context;
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll(
-     [FromQuery] int pageNumber = 1,
-     [FromQuery] int pageSize = 10,
-     [FromQuery] string? search = "")
-    {
-        if (pageNumber < 1 || pageSize < 1)
-            return BadRequest("N�mero de p�gina e tamanho devem ser maiores que 0.");
-
-        // Base query
-        var query = _context.Students.AsQueryable();
-
-        // Aplica o filtro, se houver
-        if (!string.IsNullOrWhiteSpace(search))
+        public StudentsController(AppDbContext context)
         {
-            search = search.ToLower();
-            query = query.Where(s =>
-                s.Name.ToLower().Contains(search) ||
-                s.RA.ToLower().Contains(search) ||
-                s.Email.ToLower().Contains(search) ||
-                s.CPF.ToLower().Contains(search));
+            _context = context;
         }
 
-        var totalItems = await query.CountAsync();
-
-        var students = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        var result = new
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
         {
-            PageNumber = pageNumber,
-            PageSize = pageSize,
-            TotalItems = totalItems,
-            TotalPages = (int)Math.Ceiling((double)totalItems / pageSize),
-            Items = students
-        };
+            var query = _context.Students.AsQueryable();
 
-        return Ok(result);
-    }
-
-    // GET: api/students/{id}
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var student = await _context.Students.FindAsync(id);
-        return student is null ? NotFound() : Ok(student);
-    }
-
-    // POST: api/students
-    [HttpPost]
-    public async Task<IActionResult> Create(Student student)
-    {
-        
-        var cpfExists = await _context.Students.AnyAsync(s => s.CPF == student.CPF);
-        if (cpfExists)
-        {
-            return Conflict("Um aluno com esse CPF já existe.");
-        }
-
-        for (int i = 0; i < 5; i++)
-        {
-            student.RA = await GenerateRAAsync();
-
-            try
+            if (!string.IsNullOrWhiteSpace(search))
             {
-                _context.Students.Add(student);
-                await _context.SaveChangesAsync();
+                search = search.Trim().ToLower();
+                query = query.Where(s =>
+                    s.Name.ToLower().Contains(search) ||
+                    s.Email.ToLower().Contains(search) ||
+                    s.CPF.Contains(search) ||
+                    s.RA.ToLower().Contains(search)
+                );
+            }
 
-                return CreatedAtAction(nameof(GetById), new { id = student.Id }, student);
-            }
-            catch (DbUpdateException ex)
+            var totalItems = await query.CountAsync();
+            var students = await query
+                .OrderBy(s => s.Name)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var result = new
             {
-                if (ex.InnerException?.Message.Contains("IX_Students_RA") == true)
-                    continue; 
-                else
-                    return StatusCode(500, "Erro ao salvar estudante.");
-            }
+                items = students.Select(s => new StudentResponse
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Email = s.Email,
+                    CPF = s.CPF,
+                    RA = s.RA
+                }),
+                totalItems
+            };
+
+            return Ok(result);
         }
 
-        return Conflict("Não foi possível gerar um RA único após várias tentativas.");
-    }
-
-
-    // PUT: api/students/{id}
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] Student student)
-    {
-        var existing = await _context.Students.FindAsync(id);
-        if (existing == null)
-            return NotFound();
-
-        student.Id = id;
-        student.RA = existing.RA;     // mantém o RA original
-        student.CPF = existing.CPF;   // mantém o CPF original
-
-        _context.Entry(existing).CurrentValues.SetValues(student);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
-
-    // DELETE: api/students/{id}
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var student = await _context.Students.FindAsync(id);
-        if (student is null) return NotFound();
-
-        _context.Students.Remove(student);
-        await _context.SaveChangesAsync();
-        return NoContent();
-    }
-
-    private async Task<string> GenerateRAAsync()
-    {
-        var year = DateTime.UtcNow.Year.ToString(); // "2025"
-        var prefix = $"RA{year}";
-
-        var lastRa = await _context.Students
-            .Where(s => s.RA.StartsWith(prefix))
-            .OrderByDescending(s => s.RA)
-            .Select(s => s.RA)
-            .FirstOrDefaultAsync();
-
-        int nextSequence = 1;
-
-        if (!string.IsNullOrEmpty(lastRa) && lastRa.Length >= (prefix.Length + 4))
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            var sequenceStr = lastRa.Substring(prefix.Length, 4); 
-            if (int.TryParse(sequenceStr, out int parsedSeq))
+            var student = await _context.Students.FindAsync(id);
+            if (student == null) return NotFound();
+
+            var dto = new StudentResponse
             {
-                nextSequence = parsedSeq + 1;
-            }
+                Id = student.Id,
+                Name = student.Name,
+                Email = student.Email,
+                CPF = student.CPF,
+                RA = student.RA
+            };
+
+            return Ok(dto);
         }
 
-        string newRa = $"{prefix}{nextSequence.ToString("D4")}"; // Ex: RA20250001
-        return newRa;
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateStudentRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var student = new Student
+            {
+                Name = request.Name,
+                Email = request.Email,
+                CPF = request.CPF,
+                RA = $"RA{DateTime.UtcNow:yyyyMMddHHmmss}" // Exemplo simples
+            };
+
+            _context.Students.Add(student);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetById), new { id = student.Id }, new StudentResponse
+            {
+                Id = student.Id,
+                Name = student.Name,
+                Email = student.Email,
+                CPF = student.CPF,
+                RA = student.RA
+            });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateStudentRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var student = await _context.Students.FindAsync(id);
+            if (student == null) return NotFound();
+
+            student.Name = request.Name;
+            student.Email = request.Email;
+            student.CPF = request.CPF;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var student = await _context.Students.FindAsync(id);
+            if (student == null) return NotFound();
+
+            _context.Students.Remove(student);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
