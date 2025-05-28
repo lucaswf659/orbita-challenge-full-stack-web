@@ -80,8 +80,9 @@ Gera arquivos `lcov` e `HTML` automaticamente.
 - Script PowerShell criado para automatizar cobertura:
 
 - Rode esse comando antes caso seja bloqueado pelo sistema
-  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  
 ```bash
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .run-coverage.ps1
 ```
 
