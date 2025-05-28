@@ -4,6 +4,7 @@ import { createTestingPinia } from "@pinia/testing";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createVuetify } from "vuetify";
 import { createRouter, createWebHistory } from "vue-router";
+
 // Mock do serviço
 vi.mock("@/services/studentService", () => ({
   fetchStudents: vi.fn(() =>
@@ -49,12 +50,15 @@ describe("StudentList.vue", () => {
     ],
   });
 
+  router.push = vi.fn(); // Mock explícito
+
   beforeEach(async () => {
     wrapper = mount(StudentList, {
       global: {
         plugins: [vuetify, router, createTestingPinia({ stubActions: false })],
       },
     });
+    await router.isReady();
     await flushPromises();
   });
 
@@ -69,7 +73,7 @@ describe("StudentList.vue", () => {
   it("aciona onSearch ao clicar no botão 'Pesquisar'", async () => {
     const searchBtn = wrapper.get("[data-testid='search-btn']");
     await searchBtn.trigger("click");
-    expect(wrapper.vm.loading).toBe(false); // O loading deve ter sido alterado durante a busca
+    expect(wrapper.vm.loading).toBe(false);
   });
 
   it("limpa o campo de busca ao clicar em 'Limpar'", async () => {
@@ -80,10 +84,9 @@ describe("StudentList.vue", () => {
   });
 
   it("navega para nova página ao clicar em 'Cadastrar Estudante'", async () => {
-    const pushSpy = vi.spyOn(wrapper.vm.router, "push");
     const createBtn = wrapper.get("[data-testid='create-btn']");
     await createBtn.trigger("click");
-    expect(pushSpy).toHaveBeenCalledWith("/students/new");
+    expect(router.push).toHaveBeenCalledWith("/students/new");
   });
 
   it("exibe o nome do estudante ao confirmar exclusão", async () => {

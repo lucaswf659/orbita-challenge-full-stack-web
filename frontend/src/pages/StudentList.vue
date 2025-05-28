@@ -99,121 +99,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { fetchStudents, removeStudent } from "@/services/studentService";
-import { onMounted } from "vue";
-import { useStudentsStore } from "@/stores/students";
+import { useStudentList } from "@/composables/useStudentList";
 
-const router = useRouter();
-
-// State
-const students = ref<any[]>([]);
-const totalStudents = ref(0);
-const loading = ref(false);
-const search = ref("");
-const pageNumber = ref(1);
-const deleteDialog = ref(false);
-const selectedStudent = ref<any | null>(null);
-
-const options = ref({
-  page: 1,
-  itemPerPage: 10,
-});
-
-onMounted(() => {
-  fetchData(options.value);
-});
-
-// Toast
-const toast = ref({ show: false, message: "", color: "success" });
-const showToast = (message: string, color: "success" | "error" = "success") => {
-  toast.value = { show: true, message, color };
-};
-
-// Headers
-const headers = [
-  { title: "RA", key: "ra" },
-  { title: "Nome", key: "name" },
-  { title: "CPF", key: "cpf" },
-  { title: "E-mail", key: "email" },
-  { title: "Ações", key: "actions", sortable: false },
-];
-
-interface DataTableOptions {
-  page: number;
-  itemPerPage: number;
-}
-
-async function fetchData(newOptions: DataTableOptions) {
-  loading.value = true;
-
-  try {
-    const page = newOptions.page;
-    const itemsPerPage = newOptions.itemPerPage;
-    const searchTerm = search.value.trim();
-
-    const result = await fetchStudents(page, itemsPerPage, searchTerm);
-    console.log("Fetched students:", result);
-    students.value = result.items;
-    totalStudents.value = result.totalItems;
-  } catch (err) {
-    console.error("Error fetching data:", err);
-    showToast("Erro ao buscar alunos");
-  } finally {
-    loading.value = false;
-  }
-}
-
-// Actions
-const goToCreate = () => {
-  const store = useStudentsStore();
-  store.Id = null;
-  store.Name = "";
-  store.Email = "";
-  store.RA = "";
-  store.CPF = "";
-  router.push("/students/new");
-};
-
-const editStudent = (student: any) => {
-  const studentStore = useStudentsStore();
-  studentStore.Name = student.name;
-  studentStore.Email = student.email;
-  studentStore.RA = student.ra;
-  studentStore.CPF = student.cpf;
-  studentStore.Id = student.id;
-  router.push(`/students/edit`);
-};
-
-const confirmDelete = (student: any) => {
-  selectedStudent.value = student;
-  deleteDialog.value = true;
-};
-
-const deleteStudent = async () => {
-  if (!selectedStudent.value) return;
-  try {
-    await removeStudent(selectedStudent.value.id);
-    showToast("Student deleted successfully.", "success");
-    await fetchData(options.value);
-  } catch (err) {
-    console.error("Delete failed:", err);
-    showToast("Failed to delete student.", "error");
-  } finally {
-    deleteDialog.value = false;
-  }
-};
-
-// Search
-const onSearch = async () => {
-  pageNumber.value = 1;
-  await fetchData(options.value);
-};
-
-const onClear = async () => {
-  search.value = "";
-  pageNumber.value = 1;
-  await fetchData(options.value);
-};
+const {
+  students,
+  totalStudents,
+  loading,
+  search,
+  deleteDialog,
+  selectedStudent,
+  toast,
+  headers,
+  options,
+  fetchData,
+  goToCreate,
+  editStudent,
+  confirmDelete,
+  deleteStudent,
+  onSearch,
+  onClear,
+} = useStudentList();
 </script>

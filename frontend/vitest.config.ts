@@ -29,6 +29,7 @@ export default defineConfig({
         "src/**/*.spec.ts",
         "src/shims-vuetify.d.ts",
         "src/vite-env.d.ts",
+        "src/types/Student.ts",
         "types/vuetify.d.ts",
       ],
     },

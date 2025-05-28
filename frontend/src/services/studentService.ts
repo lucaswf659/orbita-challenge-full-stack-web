@@ -20,7 +20,7 @@ export const fetchStudents = async (
   return data;
 };
 
-export const fetchStudentById = async (id: string) => {
+export const fetchStudentById = async (id: number) => {
   const { data } = await axios.get(`${API_URL}/${id}`);
   return data;
 };
@@ -33,6 +33,6 @@ export const saveStudent = async (student: any) => {
   return axios.post(API_URL, student);
 };
 
-export const removeStudent = async (id: string) => {
+export const removeStudent = async (id: number) => {
   return axios.delete(`${API_URL}/${id}`);
 };

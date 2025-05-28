@@ -2,9 +2,9 @@
 
 Este projeto implementa uma aplicação full stack de gerenciamento de matrículas de alunos utilizando:
 
-* **Frontend**: Vue 3 + TypeScript + Vuetify 3 + Vite
-* **Backend**: ASP.NET Core 8 com Entity Framework Core
-* **Banco de dados**: PostgreSQL (pode ser substituído por MySQL)
+- **Frontend**: Vue 3 + TypeScript + Vuetify 3 + Vite
+- **Backend**: ASP.NET Core 8 com Entity Framework Core
+- **Banco de dados**: PostgreSQL (pode ser substituído por MySQL ou banco InMemory para testes locais)
 
 ---
 
@@ -12,50 +12,74 @@ Este projeto implementa uma aplicação full stack de gerenciamento de matrícul
 
 ### Frontend
 
-* **Framework**: Utiliza Vue 3 com script setup para simplicidade e legibilidade.
-* **UI**: Vuetify 3 com auto import ativado (via `vite-plugin-vuetify`).
-* **Roteamento**: Vue Router com rotas nomeadas (`students`, `students/new`, `students/edit/:id`).
-* **Comunicação com a API**: `axios` centralizado no serviço `studentService.ts`.
-* **Tipagem**: Estrutura tipada com base na convenção PascalCase para compatibilidade direta com o backend.
-* **Componentização**: Separado em `StudentList.vue`, `StudentForm.vue` e `Sidebar.vue`.
+- **Framework**: Utiliza Vue 3 com script setup (Composition API) para simplicidade e reuso de lógica.
+- **UI**: Vuetify 3 com auto import ativado (via `vite-plugin-vuetify`).
+- **Roteamento**: Vue Router com rotas nomeadas (`students`, `students/new`, `students/edit`).
+- **Estado global**: Pinia com tipagem explícita, incluindo uso de `stubActions` para facilitar testes.
+- **Comunicação com a API**: `axios` centralizado no serviço `studentService.ts`.
+- **Componentização**: Separado em `StudentList.vue`, `StudentForm.vue`, e lógica extraída em composables:
+  - `useStudentList.ts` → estado, ações e interação com store/API
+  - `useStudentForm.ts` → formulário, validações, salvar e feedback
+- **Testes**: `Vitest` com cobertura de comportamento e renderização, incluindo mocks de store e serviços.
 
 ### Backend
 
-* **Camadas**: Segue separação em `API`, `Application` e `Infrastructure`, mesmo sem uso de DTOs.
-* **Modelos**: A entidade `Student` é utilizada diretamente na API (mapeada por EF).
-* **Validação**: Realizada via `ModelState` automático da ASP.NET com tipos obrigatórios (`string`, `int`).
-* **CORS**: Habilitado manualmente no `Program.cs` para permitir comunicação com o frontend (porta 5173).
-* **Migrations**: Usadas migrations padrão do EF Core para criação de banco.
+- **Camadas**: `API`, `Application` e `Infrastructure`, com migrações EF Core.
+- **Modelos**: A entidade `Student` é utilizada diretamente na API (sem DTOs ainda).
+- **Validação**: Realizada via `ModelState` com Data Annotations.
+- **CORS**: Habilitado via política global para permitir origens como `http://localhost:5173`.
+- **Migrations**: Usadas migrations padrão do EF Core para criação de banco.
 
 ---
 
-## ⚖️ Bibliotecas Utilizadas
+## 📦 Bibliotecas Utilizadas
 
 ### Frontend
 
-* `vue`
-* `vue-router`
-* `vite`
-* `vuetify`
-* `vite-plugin-vuetify`
-* `axios`
+- `vue`, `vue-router`, `vite`, `typescript`
+- `vuetify`, `vite-plugin-vuetify`
+- `pinia`, `@pinia/testing`
+- `axios`
+- `vitest`, `@vue/test-utils`
 
 ### Backend
 
-* `Microsoft.AspNetCore.Mvc`
-* `Microsoft.EntityFrameworkCore`
-* `Microsoft.EntityFrameworkCore.Design`
-* `Microsoft.EntityFrameworkCore.Tools`
+- `Microsoft.AspNetCore.Mvc`
+- `Microsoft.EntityFrameworkCore`
+- `Microsoft.EntityFrameworkCore.Design`
+- `Microsoft.EntityFrameworkCore.Tools`
+
+---
+
+## 🔬 Testes e Cobertura
+
+### Frontend:
+
+- `vitest` com `@vue/test-utils` para montar componentes
+- Cobertura calculada via `vitest --coverage`
+- Testes validam renderização, interação, exclusão e navegação
+- Router `push` mockado manualmente para testes com composables
+
+### Backend:
+
+- Estrutura pronta para uso com `xUnit` e `coverlet`
+- Script para gerar relatório de cobertura via `reportgenerator`
+
+Comando:
+
+```bash
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov
+reportgenerator -reports:coverage/lcov.info -targetdir:coverage-report -reporttypes:Html
+```
 
 ---
 
 ## 🚀 Melhorias Futuras (com tempo adicional)
 
-* [ ] Implementar DTOs na camada `Application`
-* [ ] Adicionar mensagens de sucesso/erro com `v-snackbar`
-* [ ] Adicionar validação frontend com Vuelidate ou `rules` do Vuetify
-* [ ] Criar testes unitários (ex.: com `vitest`, `xUnit`)
-* [ ] Deploy frontend (ex.: Vercel) e backend (ex.: Railway ou Azure)
+- [ ] Implementar DTOs na camada `Application`
+- [ ] Adicionar tratamento global de erros com middleware
+- [ ] Melhorar design e responsividade do formulário
+- [ ] Substituir máscaras com lib dedicada
 
 ---
 
@@ -67,4 +91,4 @@ Todos os requisitos obrigatórios foram entregues com sucesso ✅
 
 ## 🚀 Resultado Final
 
-A aplicação entrega um CRUD completo de alunos com foco em boas práticas de arquitetura, separação de responsabilidades, integração funcional entre front e back e UX fluida com Vuetify.
+A aplicação entrega um CRUD completo de alunos com foco em boas práticas de arquitetura, separação de responsabilidades, integração funcional entre front e back e UX fluida com Vuetify. O código segue padrões modernos de Vue 3 com Composition API e está preparado para manutenção, testes e evolução.
