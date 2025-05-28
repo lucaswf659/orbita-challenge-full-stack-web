@@ -79,12 +79,16 @@ namespace EdTech.API.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
+            var existing = await _context.Students.AnyAsync(s => s.CPF == request.CPF);
+            if (existing)
+                return Conflict(new { message = "Já existe um aluno com este CPF." });
+
             var student = new Student
             {
                 Name = request.Name,
                 Email = request.Email,
                 CPF = request.CPF,
-                RA = $"RA{DateTime.UtcNow:yyyyMMddHHmmss}" // Exemplo simples
+                RA = $"RA{DateTime.UtcNow:yyyyMMddHHmmss}"
             };
 
             _context.Students.Add(student);
@@ -99,6 +103,7 @@ namespace EdTech.API.Controllers
                 RA = student.RA
             });
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateStudentRequest request)

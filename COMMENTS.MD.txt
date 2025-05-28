@@ -79,6 +79,8 @@ Gera arquivos `lcov` e `HTML` automaticamente.
 - Estrutura pronta para uso com `xUnit` e `coverlet`
 - Script PowerShell criado para automatizar cobertura:
 
+- Rode esse comando antes caso seja bloqueado pelo sistema
+  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```bash
 .run-coverage.ps1
 ```
