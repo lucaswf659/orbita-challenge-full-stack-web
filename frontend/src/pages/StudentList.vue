@@ -12,6 +12,7 @@
       <v-col cols="12" md="7">
         <div class="d-flex flex-wrap align-center" style="gap: 12px">
           <v-text-field
+            data-testid="search-input"
             v-model="search"
             label="Pesquisar por nome, RA ou CPF"
             clearable
@@ -20,13 +21,19 @@
             class="flex-grow-1"
             @keyup.enter="onSearch"
           />
-          <v-btn color="primary" @click="onSearch">Pesquisar</v-btn>
-          <v-btn variant="text" @click="onClear">Limpar</v-btn>
+          <v-btn data-testid="search-btn" color="primary" @click="onSearch"
+            >Pesquisar</v-btn
+          >
+          <v-btn data-testid="clear-btn" variant="text" @click="onClear"
+            >Limpar</v-btn
+          >
         </div>
       </v-col>
 
       <v-col cols="12" md="5" class="d-flex justify-end mt-2 mt-md-0">
-        <v-btn color="primary" @click="goToCreate">Cadastrar Estudante</v-btn>
+        <v-btn data-testid="create-btn" color="primary" @click="goToCreate"
+          >Cadastrar Estudante</v-btn
+        >
       </v-col>
     </v-row>
 
@@ -35,6 +42,7 @@
       <v-col cols="12">
         <div style="min-height: 600px">
           <v-data-table-server
+            data-testid="student-table"
             :headers="headers"
             v-model:items="students"
             :items-length="totalStudents"
@@ -146,7 +154,7 @@ async function fetchData(newOptions: DataTableOptions) {
     const searchTerm = search.value.trim();
 
     const result = await fetchStudents(page, itemsPerPage, searchTerm);
-
+    console.log("Fetched students:", result);
     students.value = result.items;
     totalStudents.value = result.totalItems;
   } catch (err) {
