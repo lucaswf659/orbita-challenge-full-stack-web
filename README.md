@@ -1,4 +1,4 @@
-# COMMENTS.md
+# README.md
 
 Este projeto implementa uma aplicação full stack de gerenciamento de matrículas de alunos utilizando:
 
