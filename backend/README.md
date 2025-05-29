@@ -1,120 +1,197 @@
-GrupoA Educação - Full Stack Web Developer
-===================
+# COMMENTS.md
 
-[![N|Solid](https://www.grupoa.com.br/hs-fs/hubfs/logo-grupoa.png?width=300&name=logo-grupoa.png)](https://www.grupoa.com.br) 
+Este projeto implementa uma aplicação full stack de gerenciamento de matrículas de alunos utilizando:
 
-O objetivo deste desafio é avaliar as competências técnicas dos candidatos a desenvolvedor Full Stack Web na Maior Plataforma de Educação do Brasil, **Grupo A Educação**. 
+- **Frontend**: Vue 3 + TypeScript + Vuetify 3 + Vite
+- **Backend**: ASP.NET Core 8 com Entity Framework Core
+- **Banco de dados**: PostgreSQL (pode ser substituído por MySQL ou banco InMemory para testes locais)
 
-Será solicitado o desenvolvimento de uma Aplicação que realize a Matrícula do Aluno na Turma de Programação Web da instituição EdTech. Regras e requisitos técnicos estão detalhadas neste documento.
+---
 
-# Especificações Técnicas
-- **Front End:** [Vuetifyjs](https://vuetifyjs.com/en/)  como framework de UI
-- **API:** .netCore, C# e Entity framework
-- **Banco de Dados:** Postgress ou MySQL
-- **Idioma de escrita do código:** Inglês
+## ⚙️ Decisões de Arquitetura
 
+### Frontend
 
-# Requisitos
-## Contextualização
-Considere que uma Instituição de Ensino Superior precisa de uma solução para cadastrar e gerenciar matrículas de usuários em turmas online. Para realizar a matrícula, é necessário que o cadastro de aluno tenha sido realizado.
+- **Framework**: Utiliza Vue 3 com script setup (Composition API) para simplicidade e reuso de lógica.
+- **UI**: Vuetify 3 com auto import ativado (via `vite-plugin-vuetify`).
+- **Roteamento**: Vue Router com rotas nomeadas (`students`, `students/new`, `students/edit`).
+- **Estado global**: Pinia com tipagem explícita, incluindo uso de `stubActions` para facilitar testes.
+- **Comunicação com a API**: `axios` centralizado no serviço `studentService.ts`.
+- **Componentização**: Separado em `StudentList.vue`, `StudentForm.vue`, e lógica extraída em composables:
+  - `useStudentList.ts` → estado, ações e interação com store/API
+  - `useStudentForm.ts` → formulário, validações, salvar e feedback
+- **Testes**: `Vitest` com cobertura de comportamento e renderização, incluindo mocks de store e serviços.
 
-O desafio consiste em criar uma aplicação para o cadastro de usuários conforme os critérios de aceitação.
+#### 💡 Melhorias de Layout e Responsividade
 
-## Mockups de interface
-Abaixo alguns mockoups de interface como um guia para a criação do front-end. Fique à vontade para usar sua criatividade e melhorias na criação do front-end.
+- Adicionada responsividade à sidebar com controle dinâmico via `useDisplay` do Vuetify e breakpoints personalizados.
+- A sidebar se comporta como permanente em resoluções maiores e é ocultada automaticamente em `smAndDown`.
+- Ajustado `v-main` com `style="--v-layout-left: 0px"` para evitar espaços laterais mesmo com sidebar oculta.
+- Refinado CSS dos componentes `.students-table` e `.text-truncate` para melhor adaptação a diferentes larguras de tela.
+- Corrigido estilo global para evitar `scroll horizontal` e `vertical` indesejados em qualquer resolução.
 
-* Listagem de Alunos
-![Listagem de Alunos](/mockups/studants_list.png)
+### Backend
 
-* Criar/Editar Aluno
-![Listagem de Alunos](/mockups/studants_save.png)
+- **Camadas**: `API`, `Application` e `Infrastructure`, com migrações EF Core.
+- **Modelos**: Agora utiliza DTOs (`CreateStudentRequest`, `UpdateStudentRequest`, `StudentResponse`) para abstrair a entidade `Student`.
+- **Validação**: Realizada via `ModelState` com Data Annotations.
+- **CORS**: Habilitado via política global para permitir origens como `http://localhost:5173`.
+- **Migrations**: Usadas migrations padrão do EF Core para criação de banco.
 
-## Histórias do Usuário
-- **Sendo** um usuário administrativo da Instituição
-- **Quero** gerenciar cadastros de alunos
-- **Para** que eu possa realizar a matrícula do aluno
+---
 
-### Critérios de aceite: 
+## 📦 Bibliotecas Utilizadas
 
-#### Cenário: cadastrar novo aluno
-- **Dado** que estou na tela de Consulta de Alunos
-- **Quando** clico em Cadastrar Aluno
-- **Então** abre a tela de Cadastro do Aluno
-- **E** exibe os campos obrigatórios vazios
-####
-- **Dado** que inseri dados válidos nos campos
-- **Quando** clico em Salvar
-- **Então** cria o novo aluno na base
-- **E** retorna mensagem de sucesso
-####
-- **Dado** que inseri dados válidos nos campos
-- **Quando** clico em Cancelar
-- **Então** retorna para tela Consulta de Alunos
-- **E** não persiste a gravação dos dados no banco 
+### Frontend
 
-#### Cenário: listar alunos cadastrados 
-- **Dado** que estou no Módulo Acadêmico
-- **Quando** clico no menu Alunos
-- **Então** abre a tela de Consulta de Alunos 
-- **E** exibe opção Cadastrar Aluno ao topo
-- **E** lista dados dos alunos cadastrados
-- **E** exibe opção Editar por aluno
-- **E** exibe opção Excluir por aluno
+- `vue`, `vue-router`, `vite`, `typescript`
+- `vuetify`, `vite-plugin-vuetify`
+- `pinia`, `@pinia/testing`
+- `axios`
+- `vitest`, `@vue/test-utils`
 
-#### Cenário editar cadastro de aluno
-- **Dado** que estou na listagem de alunos
-- **Quando** clico em Editar aluno
-- **Então** abre a tela de Cadastro do Aluno 
-- **E** exibe os campos do cadastro preenchidos
-- **E** habilita alteração dos campos editáveis
-####
-- **Dado** que estou na tela de Cadastro do Aluno
-- **Quando** clica em Salvar
-- **Então** grava os dados editáveis na base
-####
-- **Dado** que estou na tela de Cadastro do Aluno
-- **Quando** clica em Cancelar
-- **Então** retorna para a tela de Consulta de Alunos
-- **E** não persiste a gravação dos dados
+### Backend
 
-#### Cenário: excluir cadastro de aluno
-- **Dado** que estou na listagem de alunos
-- **Quando** clico em Excluir aluno
-- **Então** exibe a modal de confirmação de exclusão
-####
-- **Dado** que estou na modal de confirmação de exclusão 
-- **Quando** clico em Confirmar
-- **Então** então exclui o registro do aluno
-####
-- **Dado** que estou na modal de confirmação de exclusão
-- **Quando** clico em Cancelar
-- **Então** então fecha a modal e não persiste a exclusão
+- `Microsoft.AspNetCore.Mvc`
+- `Microsoft.EntityFrameworkCore`
+- `Microsoft.EntityFrameworkCore.Design`
+- `Microsoft.EntityFrameworkCore.Tools`
+- `coverlet.collector`
+- `reportgenerator`
 
-## Campos obrigatórios:
-- **Nome** (editável)
-- **Email** (editável)
-- **RA** (não editável) (chave única)
-- **CPF** (não editável)
+---
 
-# Desejável
-- Testes unitários
-- Documentação da arquitetura de solução
+## 🔬 Testes e Cobertura
 
-# Critérios de avaliação
-- Qualidade de escrita do código
-- Organização do projeto
-- Qualidade da API
-- Lógica da solução implementada
-- Qualidade da camada de persistência
-- Utilização do Git (quantidade e descrição dos commits, Git Flow, ...)
+### Frontend:
 
-# Instruções de entrega
-1. Crie um fork do repositório no seu GitHub
-2. Faça o push do código desenvolvido no seu Github
-3. Inclua um arquivo chamado COMMENTS.md explicando
-- Decisão da arquitetura utilizada
-- Lista de bibliotecas de terceiros utilizadas
-- O que você melhoraria se tivesse mais tempo
-- Quais requisitos obrigatórios que não foram entregues
-4. Informe ao recrutador quando concluir o desafio junto com o link do repositório
-5. Após revisão do projeto junto com a equipe de desevolvimento deixe seu repositório privado
+- Foram criados 21 cenários de testes unitários, todos estão passando.
+- `vitest` com `@vue/test-utils` para montar componentes
+- Testes validam renderização, interação, exclusão e navegação
+- Router `push` mockado manualmente para testes com composables
+- Comando para rodar testes:
+
+```bash
+npm run test
+```
+
+- Comando para cobertura:
+
+```bash
+npm run test -- --coverage
+```
+
+Gera arquivos `lcov` e `HTML` automaticamente.
+
+### Backend:
+
+- Foram criados 7 cenários de testes unitários, todos estão passando.
+- Estrutura pronta para uso com `xUnit` e `coverlet`
+- Script PowerShell criado para automatizar cobertura:
+- Rode esse comando antes caso seja bloqueado pelo sistema
+
+```bash
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.run-coverage.ps1
+```
+
+- Comando alternativo direto:
+
+```bash
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov
+reportgenerator -reports:coverage/lcov.info -targetdir:coverage-report -reporttypes:Html
+```
+
+Gera relatório lcov e HTML via `reportgenerator`.
+
+Execute o arquivo que está na raiz local do projeto de backend seed.sql para popular os dados do banco de dados.
+
+---
+
+## 🔁 Decisões de Arquitetura – Backend
+
+Priorizei boas práticas de arquitetura e organização de código com foco em evolutividade, manutenção, segurança de dados e pensada como uma base em clean architecture. Abaixo, destaco as principais decisões tomadas:
+
+### ✅ 1. Implementação de DTOs (Data Transfer Objects)
+
+- **Objetivo**: Separar a lógica da API da entidade de domínio (`Student`).
+- **Benefícios**:
+  - Proteção contra exposição direta de entidades sensíveis.
+  - Possibilidade de definir regras de validação específicas por contexto (Create, Update, Response).
+  - Flexibilidade para evoluir o backend sem impactar diretamente o frontend.
+
+### ✅ 2. Padronização das Respostas da API
+
+- **Antes**: A API retornava listas simples de entidades.
+- **Agora**: Retorna um objeto com metadados (`items`, `totalItems`) e dados estruturados via `StudentResponse`.
+- **Impacto**:
+  - Facilita paginação no frontend.
+  - Torna a API mais previsível, limpa e extensível.
+
+### ✅ 3. Preparação para Escalabilidade e Manutenibilidade
+
+Mesmo com estrutura simples, a arquitetura:
+
+- Isola responsabilidades.
+- Permite futuras implementações de camadas como Services, Use Cases, Mediator, ou Clean Architecture.
+- Abre caminho para testes unitários eficazes em cada camada.
+
+### ✅ 4. Código mais legível e coeso
+
+- O controller está enxuto.
+- Operações organizadas com responsabilidades claras entre entrada (DTOs), lógica e saída (Response).
+
+## 🔁 Decisões de Arquitetura – Frontend
+
+Durante a refatoração do frontend, foquei em organização, legibilidade e separação de responsabilidades com base em boas práticas modernas do ecossistema Vue 3. Abaixo os principais pontos:
+
+### ✅ 1. Adoção da Composition API com Composables
+
+- **Objetivo**: Separar lógica de estado, manipulação e validação do template Vue.
+- **Benefícios**:
+  - Melhor reuso e testabilidade.
+  - Organização clara de lógica por domínio (ex: `useStudentList.ts`, `useStudentForm.ts`).
+  - Código mais limpo e coeso.
+
+### ✅ 2. Componentes mais enxutos e focados
+
+- **Antes**: Toda a lógica de listagem, busca, formulário e API ficava dentro dos `.vue`.
+- **Agora**: Os componentes focam apenas na exibição e interação com os composables.
+- **Impacto**:
+  - Facilita manutenção e onboarding.
+  - Isola responsabilidades visuais de lógicas de negócio.
+
+### ✅ 3. Testes mais robustos e contextualizados
+
+- Atualizados para cobrir o novo fluxo de estado via composables.
+- Mock do router e do serviço mantidos para simular navegação e requisições.
+- Cobertura com `vitest --coverage` validando todos os fluxos principais.
+
+### ✅ 4. Ponto de melhoria futura
+
+- Com a separação da lógica, a aplicação está pronta para evoluir com mais composables reutilizáveis (ex: toasts, validações globais, controle de diálogos).
+- Próximos passos podem incluir abstração para hooks de CRUD genéricos ou store modular.
+
+---
+
+## 🚀 Melhorias Futuras (com tempo adicional)
+
+- [ ] Adicionar tratamento global de erros com middleware.
+- [ ] Melhorar design e responsividade.
+- [ ] Barra de scroll lateral vertical está fixa.
+- [ ] Adicionar validador de E-mail único.
+- [ ] Criar um middleware de tratamento global de erros para respostas padronizadas.
+- [ ] Melhorar as mensagens de erro para o usuário.
+- [ ] Gostaria de ter subido o projeto na AWS, mas não deu tempo.
+
+---
+
+## ❌ Requisitos obrigatórios não entregues
+
+Todos os requisitos obrigatórios foram entregues com sucesso ✅
+
+---
+
+## 🚀 Resultado Final
+
+A aplicação entrega um CRUD completo de alunos com foco em boas práticas de arquitetura, separação de responsabilidades, integração funcional entre front e back e UX fluida com Vuetify. O código segue padrões modernos de Vue 3 com Composition API e está preparado para manutenção, testes e evolução.
