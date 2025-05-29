@@ -65,6 +65,7 @@ Este projeto implementa uma aplicação full stack de gerenciamento de matrícul
 
 ### Frontend:
 
+- Foram criados 21 cenários de testes unitários, todos estão passando.
 - `vitest` com `@vue/test-utils` para montar componentes
 - Testes validam renderização, interação, exclusão e navegação
 - Router `push` mockado manualmente para testes com composables
@@ -84,9 +85,9 @@ Gera arquivos `lcov` e `HTML` automaticamente.
 
 ### Backend:
 
+- Foram criados 7 cenários de testes unitários, todos estão passando.
 - Estrutura pronta para uso com `xUnit` e `coverlet`
 - Script PowerShell criado para automatizar cobertura:
-
 - Rode esse comando antes caso seja bloqueado pelo sistema
 
 ```bash
@@ -103,11 +104,13 @@ reportgenerator -reports:coverage/lcov.info -targetdir:coverage-report -reportty
 
 Gera relatório lcov e HTML via `reportgenerator`.
 
+Execute o arquivo que está na raiz local do projeto de backend seed.sql para popular os dados do banco de dados.
+
 ---
 
-## 🔁 Decisões de Arquitetura – Refatoração do StudentsController
+## 🔁 Decisões de Arquitetura – Backend
 
-Durante a refatoração do StudentsController, priorizamos boas práticas de arquitetura e organização de código com foco em evolutividade, manutenção e segurança de dados. Abaixo, destacamos as principais decisões tomadas:
+Priorizei boas práticas de arquitetura e organização de código com foco em evolutividade, manutenção, segurança de dados e pensada como uma base em clean architecture. Abaixo, destaco as principais decisões tomadas:
 
 ### ✅ 1. Implementação de DTOs (Data Transfer Objects)
 
@@ -127,7 +130,7 @@ Durante a refatoração do StudentsController, priorizamos boas práticas de arq
 
 ### ✅ 3. Preparação para Escalabilidade e Manutenibilidade
 
-Mesmo com estrutura simples, a refatoração:
+Mesmo com estrutura simples, a arquitetura:
 
 - Isola responsabilidades.
 - Permite futuras implementações de camadas como Services, Use Cases, Mediator, ou Clean Architecture.
@@ -135,12 +138,12 @@ Mesmo com estrutura simples, a refatoração:
 
 ### ✅ 4. Código mais legível e coeso
 
-- O controller se tornou mais enxuto.
+- O controller está enxuto.
 - Operações organizadas com responsabilidades claras entre entrada (DTOs), lógica e saída (Response).
 
-## 🔁 Decisões de Arquitetura – Refatoração do Frontend
+## 🔁 Decisões de Arquitetura – Frontend
 
-Durante a refatoração do frontend, focamos em organização, legibilidade e separação de responsabilidades com base em boas práticas modernas do ecossistema Vue 3. Abaixo os principais pontos:
+Durante a refatoração do frontend, foquei em organização, legibilidade e separação de responsabilidades com base em boas práticas modernas do ecossistema Vue 3. Abaixo os principais pontos:
 
 ### ✅ 1. Adoção da Composition API com Composables
 
@@ -173,11 +176,13 @@ Durante a refatoração do frontend, focamos em organização, legibilidade e se
 
 ## 🚀 Melhorias Futuras (com tempo adicional)
 
-- [ ] Adicionar tratamento global de erros com middleware
-- [ ] Melhorar design e responsividade
-- [ ] Adicionar validador de E-mail único
-- [ ]Criar um middleware de tratamento global de erros para respostas padronizadas.
-- [ ]Separar a lógica de geração de RA em um serviço dedicado (RAService) no futuro.
+- [ ] Adicionar tratamento global de erros com middleware.
+- [ ] Melhorar design e responsividade.
+- [ ] Barra de scroll lateral vertical está fixa.
+- [ ] Adicionar validador de E-mail único.
+- [ ] Criar um middleware de tratamento global de erros para respostas padronizadas.
+- [ ] Melhorar as mensagens de erro para o usuário.
+- [ ] Gostaria de ter subido o projeto na AWS, mas não deu tempo.
 
 ---
 
