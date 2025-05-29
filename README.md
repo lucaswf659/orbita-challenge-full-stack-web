@@ -176,7 +176,6 @@ Durante a refatoração do frontend, foquei em organização, legibilidade e sep
 
 ## 🚀 Melhorias Futuras (com tempo adicional)
 
-- [ ] Adicionar tratamento global de erros com middleware.
 - [ ] Melhorar design e responsividade.
 - [ ] Barra de scroll lateral vertical está fixa.
 - [ ] Adicionar validador de E-mail único.
