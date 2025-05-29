@@ -1,6 +1,8 @@
 <template>
   <v-container>
-    <h1>{{ !form.Id ? "Novo Estudante" : "Editar Estudante" }}</h1>
+    <h1 class="mb-10">
+      {{ !form.Id ? "Novo Estudante" : "Editar Estudante" }}
+    </h1>
 
     <v-form ref="formRef" @submit.prevent="save">
       <v-text-field
@@ -24,10 +26,15 @@
         required
       />
 
-      <v-btn type="submit" color="primary" class="mt-4">Salvar</v-btn>
-      <v-btn text class="mt-4" @click="router.push('/students')">
-        Cancelar
-      </v-btn>
+      <v-row class="mt-4" no-gutters>
+        <v-col cols="6" class="pr-1">
+          <v-btn type="submit" color="secondary-color" block> Salvar </v-btn>
+        </v-col>
+
+        <v-col cols="6" class="pl-1">
+          <v-btn text block @click="router.push('/students')"> Cancelar </v-btn>
+        </v-col>
+      </v-row>
     </v-form>
 
     <!-- Toast feedback -->

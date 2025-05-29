@@ -77,18 +77,35 @@ namespace EdTech.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateStudentRequest request)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             var existing = await _context.Students.AnyAsync(s => s.CPF == request.CPF);
             if (existing)
                 return Conflict(new { message = "Já existe um aluno com este CPF." });
+
+            // Buscar o último RA existente
+            var lastStudent = await _context.Students
+                .OrderByDescending(s => s.Id)
+                .FirstOrDefaultAsync();
+
+            int nextNumber = 1;
+
+            if (lastStudent != null && lastStudent.RA?.Length == 10)
+            {
+                var lastNumberStr = lastStudent.RA.Substring(6); // ex: "1025"
+                if (int.TryParse(lastNumberStr, out int lastNumber))
+                {
+                    nextNumber = lastNumber + 1;
+                }
+            }
 
             var student = new Student
             {
                 Name = request.Name,
                 Email = request.Email,
                 CPF = request.CPF,
-                RA = $"RA{DateTime.UtcNow:yyyyMMddHHmmss}"
+                RA = $"RA{DateTime.UtcNow:yyyy}{nextNumber:D4}"
             };
 
             _context.Students.Add(student);
@@ -103,6 +120,7 @@ namespace EdTech.API.Controllers
                 RA = student.RA
             });
         }
+
 
 
         [HttpPut("{id}")]

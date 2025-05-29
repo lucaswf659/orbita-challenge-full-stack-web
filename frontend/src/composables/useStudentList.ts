@@ -30,10 +30,10 @@ export function useStudentList() {
   };
 
   const headers = [
-    { title: "RA", key: "ra" },
-    { title: "Nome", key: "name" },
-    { title: "CPF", key: "cpf" },
-    { title: "E-mail", key: "email" },
+    { title: "RA", key: "ra", sortable: false },
+    { title: "Nome", key: "name", sortable: false },
+    { title: "CPF", key: "cpf", sortable: false },
+    { title: "E-mail", key: "email", sortable: false },
     { title: "Ações", key: "actions", sortable: false },
   ];
 

@@ -1,12 +1,11 @@
 <template>
-  <v-navigation-drawer permanent app>
-    <v-divider></v-divider>
+  <div>
     <v-list density="compact" nav>
       <v-list-item to="/students" router prepend-icon="mdi-account-multiple">
         <v-list-item-title>Estudantes</v-list-item-title>
       </v-list-item>
     </v-list>
-  </v-navigation-drawer>
+  </div>
 </template>
 
 <script setup lang="ts"></script>
