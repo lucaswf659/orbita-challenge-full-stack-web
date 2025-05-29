@@ -21,18 +21,17 @@
         label="CPF"
         v-model="form.CPF"
         :rules="[required, validateCpf]"
-        v-mask="'###.###.###-##'"
         :disabled="!!form.Id"
         required
+        maxlength="14"
       />
 
       <v-row class="mt-4" no-gutters>
         <v-col cols="6" class="pr-1">
-          <v-btn type="submit" color="secondary-color" block> Salvar </v-btn>
+          <v-btn type="submit" color="secondary-color" block>Salvar</v-btn>
         </v-col>
-
         <v-col cols="6" class="pl-1">
-          <v-btn text block @click="router.push('/students')"> Cancelar </v-btn>
+          <v-btn text block @click="router.push('/students')">Cancelar</v-btn>
         </v-col>
       </v-row>
     </v-form>
@@ -50,9 +49,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useStudentForm } from "@/composables/useStudentForm";
+import { formatCpf } from "@/composables/useStudentForm";
 
 const router = useRouter();
 
@@ -60,7 +60,6 @@ const {
   formRef,
   form,
   toast,
-  showToast,
   required,
   validateEmail,
   validateCpf,
@@ -69,4 +68,11 @@ const {
 } = useStudentForm();
 
 onMounted(checkStudentContext);
+
+watch(
+  () => form.value.CPF,
+  (newValue) => {
+    form.value.CPF = formatCpf(newValue);
+  }
+);
 </script>

@@ -3,6 +3,39 @@ import { useRouter, useRoute } from "vue-router";
 import { saveStudent } from "@/services/studentService";
 import { useStudentsStore } from "@/stores/students";
 
+function isValidCpf(cpf: string): boolean {
+  cpf = cpf.replace(/[^\d]+/g, "");
+
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+  let soma = 0;
+  for (let i = 0; i < 9; i++) {
+    soma += parseInt(cpf.charAt(i)) * (10 - i);
+  }
+  let resto = 11 - (soma % 11);
+  let digito1 = resto >= 10 ? 0 : resto;
+
+  soma = 0;
+  for (let i = 0; i < 10; i++) {
+    soma += parseInt(cpf.charAt(i)) * (11 - i);
+  }
+  resto = 11 - (soma % 11);
+  let digito2 = resto >= 10 ? 0 : resto;
+
+  return (
+    parseInt(cpf.charAt(9)) === digito1 && parseInt(cpf.charAt(10)) === digito2
+  );
+}
+
+export function formatCpf(cpf: string): string {
+  const numbers = cpf.replace(/\D/g, "").slice(0, 11);
+
+  return numbers
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1-$2");
+}
+
 export function useStudentForm() {
   const router = useRouter();
   const route = useRoute();
@@ -26,6 +59,7 @@ export function useStudentForm() {
     message: "",
     color: "success" as "success" | "error",
   });
+
   const showToast = (
     message: string,
     color: "success" | "error" = "success"
@@ -42,8 +76,8 @@ export function useStudentForm() {
   };
 
   const validateCpf = (value: string) => {
-    const regex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
-    return regex.test(value) || "CPF inválido";
+    if (!value) return true;
+    return isValidCpf(value) || "CPF inválido";
   };
 
   const isEditRoute = () => route.name === "StudentEdit";
@@ -62,6 +96,8 @@ export function useStudentForm() {
     try {
       const payload = { ...form.value };
       if (!payload.Id) delete payload.Id;
+
+      payload.CPF = formatCpf(payload.CPF);
 
       await saveStudent(payload);
 
@@ -86,6 +122,7 @@ export function useStudentForm() {
     required,
     validateEmail,
     validateCpf,
+    formatCpf,
     checkStudentContext,
     save,
   };

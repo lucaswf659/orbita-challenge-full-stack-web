@@ -168,7 +168,6 @@ const {
   selectedStudent,
   toast,
   headers,
-  options,
   fetchData,
   goToCreate,
   editStudent,

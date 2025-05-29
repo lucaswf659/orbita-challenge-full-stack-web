@@ -22,6 +22,14 @@ Este projeto implementa uma aplicação full stack de gerenciamento de matrícul
   - `useStudentForm.ts` → formulário, validações, salvar e feedback
 - **Testes**: `Vitest` com cobertura de comportamento e renderização, incluindo mocks de store e serviços.
 
+#### 💡 Melhorias de Layout e Responsividade
+
+- Adicionada responsividade à sidebar com controle dinâmico via `useDisplay` do Vuetify e breakpoints personalizados.
+- A sidebar se comporta como permanente em resoluções maiores e é ocultada automaticamente em `smAndDown`.
+- Ajustado `v-main` com `style="--v-layout-left: 0px"` para evitar espaços laterais mesmo com sidebar oculta.
+- Refinado CSS dos componentes `.students-table` e `.text-truncate` para melhor adaptação a diferentes larguras de tela.
+- Corrigido estilo global para evitar `scroll horizontal` e `vertical` indesejados em qualquer resolução.
+
 ### Backend
 
 - **Camadas**: `API`, `Application` e `Infrastructure`, com migrações EF Core.
@@ -80,7 +88,7 @@ Gera arquivos `lcov` e `HTML` automaticamente.
 - Script PowerShell criado para automatizar cobertura:
 
 - Rode esse comando antes caso seja bloqueado pelo sistema
-  
+
 ```bash
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .run-coverage.ps1
@@ -102,6 +110,7 @@ Gera relatório lcov e HTML via `reportgenerator`.
 Durante a refatoração do StudentsController, priorizamos boas práticas de arquitetura e organização de código com foco em evolutividade, manutenção e segurança de dados. Abaixo, destacamos as principais decisões tomadas:
 
 ### ✅ 1. Implementação de DTOs (Data Transfer Objects)
+
 - **Objetivo**: Separar a lógica da API da entidade de domínio (`Student`).
 - **Benefícios**:
   - Proteção contra exposição direta de entidades sensíveis.
@@ -109,6 +118,7 @@ Durante a refatoração do StudentsController, priorizamos boas práticas de arq
   - Flexibilidade para evoluir o backend sem impactar diretamente o frontend.
 
 ### ✅ 2. Padronização das Respostas da API
+
 - **Antes**: A API retornava listas simples de entidades.
 - **Agora**: Retorna um objeto com metadados (`items`, `totalItems`) e dados estruturados via `StudentResponse`.
 - **Impacto**:
@@ -116,29 +126,24 @@ Durante a refatoração do StudentsController, priorizamos boas práticas de arq
   - Torna a API mais previsível, limpa e extensível.
 
 ### ✅ 3. Preparação para Escalabilidade e Manutenibilidade
+
 Mesmo com estrutura simples, a refatoração:
+
 - Isola responsabilidades.
 - Permite futuras implementações de camadas como Services, Use Cases, Mediator, ou Clean Architecture.
 - Abre caminho para testes unitários eficazes em cada camada.
 
 ### ✅ 4. Código mais legível e coeso
+
 - O controller se tornou mais enxuto.
 - Operações organizadas com responsabilidades claras entre entrada (DTOs), lógica e saída (Response).
-
-### ✅ 5. Evolução futura: geração de RA
-- Atualmente, o RA é gerado inline no controller com base em timestamp.
-- Pode ser facilmente movido para um método `GenerateRAAsync()` ou `RAService`, permitindo:
-  - Validação de unicidade.
-  - Reuso em outros fluxos.
-  - Substituição futura por outro padrão (ex: UUID, matrícula integrada).
-
----
 
 ## 🔁 Decisões de Arquitetura – Refatoração do Frontend
 
 Durante a refatoração do frontend, focamos em organização, legibilidade e separação de responsabilidades com base em boas práticas modernas do ecossistema Vue 3. Abaixo os principais pontos:
 
 ### ✅ 1. Adoção da Composition API com Composables
+
 - **Objetivo**: Separar lógica de estado, manipulação e validação do template Vue.
 - **Benefícios**:
   - Melhor reuso e testabilidade.
@@ -146,6 +151,7 @@ Durante a refatoração do frontend, focamos em organização, legibilidade e se
   - Código mais limpo e coeso.
 
 ### ✅ 2. Componentes mais enxutos e focados
+
 - **Antes**: Toda a lógica de listagem, busca, formulário e API ficava dentro dos `.vue`.
 - **Agora**: Os componentes focam apenas na exibição e interação com os composables.
 - **Impacto**:
@@ -153,11 +159,13 @@ Durante a refatoração do frontend, focamos em organização, legibilidade e se
   - Isola responsabilidades visuais de lógicas de negócio.
 
 ### ✅ 3. Testes mais robustos e contextualizados
+
 - Atualizados para cobrir o novo fluxo de estado via composables.
 - Mock do router e do serviço mantidos para simular navegação e requisições.
 - Cobertura com `vitest --coverage` validando todos os fluxos principais.
 
 ### ✅ 4. Ponto de melhoria futura
+
 - Com a separação da lógica, a aplicação está pronta para evoluir com mais composables reutilizáveis (ex: toasts, validações globais, controle de diálogos).
 - Próximos passos podem incluir abstração para hooks de CRUD genéricos ou store modular.
 
@@ -166,8 +174,10 @@ Durante a refatoração do frontend, focamos em organização, legibilidade e se
 ## 🚀 Melhorias Futuras (com tempo adicional)
 
 - [ ] Adicionar tratamento global de erros com middleware
-- [ ] Melhorar design e responsividade do formulário
-- [ ] Substituir máscaras com lib dedicada
+- [ ] Melhorar design e responsividade
+- [ ] Adicionar validador de E-mail único
+- [ ]Criar um middleware de tratamento global de erros para respostas padronizadas.
+- [ ]Separar a lógica de geração de RA em um serviço dedicado (RAService) no futuro.
 
 ---
 
